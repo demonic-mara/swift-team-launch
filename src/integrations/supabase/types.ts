@@ -14,7 +14,446 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          avatar_url: string | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          member_limit: number
+          name: string
+          privacy: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          member_limit?: number
+          name: string
+          privacy?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          member_limit?: number
+          name?: string
+          privacy?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "groups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          chatroom_type: string
+          content: string
+          created_at: string
+          file_type: string | null
+          file_url: string | null
+          group_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          chatroom_type: string
+          content: string
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          group_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          chatroom_type?: string
+          content?: string
+          created_at?: string
+          file_type?: string | null
+          file_url?: string | null
+          group_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          level: number
+          quest_points: number
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id: string
+          level?: number
+          quest_points?: number
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          level?: number
+          quest_points?: number
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      quest_master_history: {
+        Row: {
+          ended_at: string | null
+          group_id: string
+          id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          ended_at?: string | null
+          group_id: string
+          id?: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          ended_at?: string | null
+          group_id?: string
+          id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_master_history_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_master_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_ratings: {
+        Row: {
+          created_at: string
+          id: string
+          rated_by: string
+          rating: string
+          submission_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rated_by: string
+          rating: string
+          submission_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rated_by?: string
+          rating?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_ratings_rated_by_fkey"
+            columns: ["rated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_ratings_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "quest_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quest_submissions: {
+        Row: {
+          approval_count: number | null
+          id: string
+          proof_file_type: string | null
+          proof_file_url: string | null
+          proof_text: string | null
+          quest_id: string
+          rejection_count: number | null
+          reviewed_at: string | null
+          status: string | null
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          approval_count?: number | null
+          id?: string
+          proof_file_type?: string | null
+          proof_file_url?: string | null
+          proof_text?: string | null
+          quest_id: string
+          rejection_count?: number | null
+          reviewed_at?: string | null
+          status?: string | null
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          approval_count?: number | null
+          id?: string
+          proof_file_type?: string | null
+          proof_file_url?: string | null
+          proof_text?: string | null
+          quest_id?: string
+          rejection_count?: number | null
+          reviewed_at?: string | null
+          status?: string | null
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quest_submissions_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quest_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quests: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          description: string
+          difficulty: string
+          group_id: string
+          id: string
+          is_auto_generated: boolean | null
+          points: number
+          status: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description: string
+          difficulty: string
+          group_id: string
+          id?: string
+          is_auto_generated?: boolean | null
+          points: number
+          status?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          description?: string
+          difficulty?: string
+          group_id?: string
+          id?: string
+          is_auto_generated?: boolean | null
+          points?: number
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quests_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quests_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vote_choices: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          id: string
+          user_id: string
+          vote_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+          vote_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+          vote_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vote_choices_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vote_choices_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vote_choices_vote_id_fkey"
+            columns: ["vote_id"]
+            isOneToOne: false
+            referencedRelation: "votes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      votes: {
+        Row: {
+          created_at: string
+          election_end: string
+          election_start: string
+          group_id: string
+          id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          election_end: string
+          election_start?: string
+          group_id: string
+          id?: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          election_end?: string
+          election_start?: string
+          group_id?: string
+          id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "votes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
