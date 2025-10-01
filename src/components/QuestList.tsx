@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Scroll, Plus, CheckCircle2, Clock } from "lucide-react";
+import { Scroll, Plus, CheckCircle2, Clock, Target } from "lucide-react";
 import CreateQuestDialog from "./CreateQuestDialog";
+import QuestRatingSystem from "./QuestRatingSystem";
 
 interface Quest {
   id: string;
@@ -17,6 +18,7 @@ interface Quest {
   deadline: string | null;
   is_auto_generated: boolean;
   created_at: string;
+  quest_submissions: QuestSubmission[];
 }
 
 interface QuestListProps {
@@ -25,14 +27,30 @@ interface QuestListProps {
   userRole: string;
 }
 
+interface QuestSubmission {
+  id: string;
+  user_id: string;
+  proof_text: string | null;
+  proof_file_url: string | null;
+  proof_file_type: string | null;
+  status: string;
+  approval_count: number;
+  rejection_count: number;
+  profiles: {
+    username: string;
+  };
+}
+
 const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
   const { toast } = useToast();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [totalMembers, setTotalMembers] = useState(0);
 
   useEffect(() => {
     fetchQuests();
+    fetchMemberCount();
 
     const channel = supabase
       .channel(`quests-${groupId}`)
@@ -55,11 +73,33 @@ const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
     };
   }, [groupId]);
 
+  const fetchMemberCount = async () => {
+    const { count } = await supabase
+      .from("group_members")
+      .select("*", { count: "exact", head: true })
+      .eq("group_id", groupId);
+    
+    setTotalMembers(count || 0);
+  };
+
   const fetchQuests = async () => {
     try {
       const { data, error } = await supabase
         .from("quests")
-        .select("*")
+        .select(`
+          *,
+          quest_submissions(
+            id,
+            user_id,
+            proof_text,
+            proof_file_url,
+            proof_file_type,
+            status,
+            approval_count,
+            rejection_count,
+            profiles(username)
+          )
+        `)
         .eq("group_id", groupId)
         .eq("status", "active")
         .order("created_at", { ascending: false });
@@ -77,16 +117,16 @@ const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
+  const getDifficultyVariant = (difficulty: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (difficulty) {
       case "easy":
-        return "bg-accent/20 text-accent";
+        return "secondary";
       case "medium":
-        return "bg-secondary/20 text-secondary";
+        return "default";
       case "hard":
-        return "bg-destructive/20 text-destructive";
+        return "destructive";
       default:
-        return "bg-muted";
+        return "outline";
     }
   };
 
@@ -114,44 +154,84 @@ const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {quests.map((quest) => (
-            <Card key={quest.id} className="hover:shadow-magical transition-shadow">
+            <Card key={quest.id} className="border-primary/20 shadow-sm animate-fade-in">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div className="space-y-1 flex-1">
-                    <CardTitle className="text-lg">{quest.title}</CardTitle>
-                    <CardDescription className="line-clamp-2">{quest.description}</CardDescription>
+                  <div className="space-y-2">
+                    <CardTitle className="flex items-center gap-2">
+                      <Scroll className="h-5 w-5 text-primary" />
+                      {quest.title}
+                    </CardTitle>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={getDifficultyVariant(quest.difficulty)}>
+                        {quest.difficulty}
+                      </Badge>
+                      <Badge variant="secondary">
+                        <Target className="h-3 w-3 mr-1" />
+                        {quest.points} QP
+                      </Badge>
+                      {quest.deadline && (
+                        <Badge variant="outline">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {new Date(quest.deadline).toLocaleDateString()}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  {quest.is_auto_generated && (
-                    <Badge variant="outline" className="text-xs">
-                      Auto
-                    </Badge>
-                  )}
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Badge className={getDifficultyColor(quest.difficulty)}>
-                    {quest.difficulty}
-                  </Badge>
-                  <div className="flex items-center gap-1 text-secondary font-semibold">
-                    <span>{quest.points}</span>
-                    <span className="text-xs">QP</span>
-                  </div>
-                </div>
-                {quest.deadline && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>
-                      Due: {new Date(quest.deadline).toLocaleDateString()}
-                    </span>
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground">{quest.description}</p>
+                
+                {quest.quest_submissions && quest.quest_submissions.length > 0 && (
+                  <div className="space-y-3 pt-4 border-t">
+                    <h4 className="font-semibold text-sm">Submissions</h4>
+                    {quest.quest_submissions.map((submission) => (
+                      <div key={submission.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">
+                            {submission.profiles.username}
+                          </span>
+                        </div>
+                        {submission.proof_text && (
+                          <p className="text-sm text-muted-foreground">
+                            {submission.proof_text}
+                          </p>
+                        )}
+                        {submission.proof_file_url && (
+                          <div className="mt-2">
+                            {submission.proof_file_type?.startsWith("image/") ? (
+                              <img
+                                src={submission.proof_file_url}
+                                alt="Proof"
+                                className="max-w-sm rounded-lg border"
+                              />
+                            ) : (
+                              <a
+                                href={submission.proof_file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline text-sm"
+                              >
+                                View attachment
+                              </a>
+                            )}
+                          </div>
+                        )}
+                        <QuestRatingSystem
+                          submissionId={submission.id}
+                          userId={userId}
+                          status={submission.status}
+                          approvalCount={submission.approval_count}
+                          rejectionCount={submission.rejection_count}
+                          totalMembers={totalMembers}
+                        />
+                      </div>
+                    ))}
                   </div>
                 )}
-                <Button className="w-full" variant="outline">
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Submit Proof
-                </Button>
               </CardContent>
             </Card>
           ))}

@@ -4,8 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, Users, Plus, LogOut } from "lucide-react";
+import { Sparkles, Users, Plus } from "lucide-react";
 import { User, Session } from "@supabase/supabase-js";
+import AppHeader from "@/components/AppHeader";
 
 interface Group {
   id: string;
@@ -97,11 +98,6 @@ const Groups = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/auth");
-  };
-
   const joinGroup = async (groupId: string) => {
     try {
       const { error } = await supabase
@@ -140,27 +136,21 @@ const Groups = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-primary" />
-              QuestRealms
-            </h1>
-            <p className="text-muted-foreground mt-2">Join guilds and embark on adventures</p>
-          </div>
-          <div className="flex gap-2">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <AppHeader />
+      
+      <div className="p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <h1 className="text-3xl font-bold">My Guilds</h1>
+              <p className="text-muted-foreground mt-2">Join guilds and embark on adventures</p>
+            </div>
             <Button onClick={() => navigate("/create-group")} size="lg">
               <Plus className="h-5 w-5 mr-2" />
               Create Guild
             </Button>
-            <Button onClick={handleLogout} variant="outline" size="lg">
-              <LogOut className="h-5 w-5 mr-2" />
-              Logout
-            </Button>
           </div>
-        </div>
 
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
@@ -234,7 +224,8 @@ const Groups = () => {
               </Card>
             ))}
           </div>
-        </section>
+          </section>
+        </div>
       </div>
     </div>
   );
