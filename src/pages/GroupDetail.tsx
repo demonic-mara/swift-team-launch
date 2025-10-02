@@ -36,6 +36,7 @@ const GroupDetail = () => {
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [userRole, setUserRole] = useState<string>("");
+  const [isFounder, setIsFounder] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ const GroupDetail = () => {
 
       if (groupError) throw groupError;
       setGroup(groupData);
+      setIsFounder(groupData.created_by === user!.id);
 
       const { data: memberData, error: memberError } = await supabase
         .from("group_members")
@@ -166,7 +168,7 @@ const GroupDetail = () => {
           </TabsContent>
 
           <TabsContent value="quests" className="space-y-4">
-            <QuestList groupId={id!} userId={user!.id} userRole={userRole} />
+            <QuestList groupId={id!} userId={user!.id} userRole={userRole} isFounder={isFounder} />
             <ChatRoom groupId={id!} userId={user!.id} chatroomType="quest" />
           </TabsContent>
 

@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Scroll, Plus, CheckCircle2, Clock, Target } from "lucide-react";
 import CreateQuestDialog from "./CreateQuestDialog";
 import QuestRatingSystem from "./QuestRatingSystem";
+import SubmitQuestProof from "./SubmitQuestProof";
 
 interface Quest {
   id: string;
@@ -25,6 +26,7 @@ interface QuestListProps {
   groupId: string;
   userId: string;
   userRole: string;
+  isFounder: boolean;
 }
 
 interface QuestSubmission {
@@ -41,7 +43,7 @@ interface QuestSubmission {
   };
 }
 
-const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
+const QuestList = ({ groupId, userId, userRole, isFounder }: QuestListProps) => {
   const { toast } = useToast();
   const [quests, setQuests] = useState<Quest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,7 +139,7 @@ const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
           <Scroll className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-bold">Active Quests</h2>
         </div>
-        {userRole === "quest_master" && (
+        {(userRole === "quest_master" || isFounder) && (
           <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Create Quest
@@ -184,6 +186,13 @@ const QuestList = ({ groupId, userId, userRole }: QuestListProps) => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <p className="text-muted-foreground">{quest.description}</p>
+                
+                {/* Submit Proof Button */}
+                <SubmitQuestProof 
+                  questId={quest.id} 
+                  questTitle={quest.title}
+                  userId={userId}
+                />
                 
                 {quest.quest_submissions && quest.quest_submissions.length > 0 && (
                   <div className="space-y-3 pt-4 border-t">
