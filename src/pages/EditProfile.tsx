@@ -74,7 +74,7 @@ const EditProfile = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
-      navigate("/profile");
+      navigate("/profile", { replace: true });
     } catch (error: any) {
       toast({
         title: "Error",
